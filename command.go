@@ -56,19 +56,20 @@ func (c Command) Run(ctx *Context) error {
 	}
 
 	var err error
+	var argErr error
 	if firstFlagIndex > -1 {
 		args := ctx.Args()
 		regularArgs := args[1:firstFlagIndex]
 		flagArgs := args[firstFlagIndex:]
-		c.BuildCustomArgs(ctx)
+		argErr = c.BuildCustomArgs(ctx)
 		err = set.Parse(append(flagArgs, regularArgs...))
 	} else {
-		c.BuildCustomArgs(ctx)
+		argErr = c.BuildCustomArgs(ctx)
 		err = set.Parse(ctx.Args().Tail())
 	}
 
-	if err != nil {
-		fmt.Printf("Incorrect Usage.\n\n")
+	if err != nil || argErr != nil {
+		fmt.Print("There is an error with the command entered. ", argErr, "\n\n")
 		ShowCommandHelp(ctx, c.Name)
 		fmt.Println("")
 		return err
@@ -94,11 +95,20 @@ func (c Command) Run(ctx *Context) error {
 func (c Command) BuildCustomArgs(ctx *Context) error {
 	// Combine the argument names with their entered values
 	// The order in the command input are known, their order in the context is unknown, so we do some crazy stuff to get them sorted out
-	i := 0
+	i := 0 // counter for entered arg key
+	r := 0 // counter for required args
 	m := make(map[string]string)
 
-	for _,val := range ctx.Args()[1:]  {
-		if !strings.HasPrefix(val, "-") {
+	// Count our number of required arguments for this command
+	for _,passedArg := range c.Arguments {
+		if !passedArg.Optional == true {
+			r++
+		}
+	}
+
+	// Map our known arguments with what was given, and note any unaccounted for arguments
+	for _,val := range ctx.Args()[1:] {
+		if !strings.HasPrefix(val, "-") && len(c.Arguments) > i {
 			name := c.Arguments[i].Name
 			value := val
 			m[name] = value
@@ -106,6 +116,11 @@ func (c Command) BuildCustomArgs(ctx *Context) error {
 		}
 	}
 
+	// Return an error if we were not given enough required arguments
+	if i < r {
+		err := fmt.Errorf("Not enough arguments! Expecting [%v] arguments, was given [%v].", r, i)
+		return err
+	}
 	ctx.SetArgs = m
 	return nil
 }
