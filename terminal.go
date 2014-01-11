@@ -74,6 +74,7 @@ func ShowErrorMessage(title string, message string) {
 	titleWidth := len(title)
 	msgWidth := len(message)
 	var totalWidth int
+	// TODO make this use math.Max or something? idk
 	if titleWidth > msgWidth {
 		totalWidth = titleWidth + 4
 	} else {
