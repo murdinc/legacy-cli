@@ -1,10 +1,15 @@
-[![Build Status](https://travis-ci.org/codegangsta/cli.png?branch=master)](https://travis-ci.org/codegangsta/cli)
+[![Build Status](https://travis-ci.org/ahmad972/cli.png?branch=master)](https://travis-ci.org/ahmad972/cli)
 
 # cli.go
 cli.go is simple, fast, and fun package for building command line apps in Go. The goal is to enable developers to write fast and distributable command line applications in an expressive way.
 
-You can view the API docs here:
-http://godoc.org/github.com/codegangsta/cli
+The majority of the code is the [cli library written by codegansta] (https://github.com/codegangsta/cli)
+I have also included the [termtable library written by stevedomin] (https://github.com/stevedomin/termtable)
+
+This library is *NOT* backwards compatible with the version written by codegangsta, as I have changed some terminologies and types to accomodate named arguments. This was done to allow for mandatory and optional arguments to commands. It should not be too time consuming to adapt an existing project to use this library though, all of the changes can be made in the place where NewApp() is defined. 
+
+I also added ansi color  support via text/template and a function to display errors. 
+
 
 ## Overview
 Command line apps are usually so tiny that there is absolutely no reason why your code should *not* be self-documenting. Things like generating help text and parsing command flags/options should not hinder productivity when writing a command line app.
@@ -16,7 +21,7 @@ Make sure you have the a working Go environment (go 1.1 is *required*). [See the
 
 To install cli.go, simply run:
 ```
-$ go get github.com/codegangsta/cli
+$ go get github.com/ahmad972/cli
 ```
 
 Make sure your PATH includes to the `$GOPATH/bin` directory so your commands can be easily used:
@@ -32,7 +37,7 @@ package main
 
 import (
   "os"
-  "github.com/codegangsta/cli"
+  "github.com/ahmad972/cli"
 )
 
 func main() {
@@ -47,7 +52,7 @@ package main
 
 import (
   "os"
-  "github.com/codegangsta/cli"
+  "github.com/ahmad972/cli"
 )
 
 func main() {
@@ -74,7 +79,7 @@ package main
 
 import (
   "os"
-  "github.com/codegangsta/cli"
+  "github.com/ahmad972/cli"
 )
 
 func main() {
@@ -192,4 +197,4 @@ app.Commands = []cli.Command{
 ```
 
 ## About
-cli.go is written by none other than the [Code Gangsta](http://codegangsta.io)
+cli.go is written by none other than the [Code Gangsta](http://codegangsta.io) - This version of the library was modified by ahmad972 to add additional functionality
