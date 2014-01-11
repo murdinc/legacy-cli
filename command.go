@@ -68,14 +68,8 @@ func (c Command) Run(ctx *Context) error {
 		err = set.Parse(ctx.Args().Tail())
 	}
 
-	if err != nil || argErr != nil {
-		fmt.Print("There is an error with the command entered. ", argErr, "\n\n")
-		ShowCommandHelp(ctx, c.Name)
-		fmt.Println("")
-		return err
-	}
-
 	nerr := normalizeFlags(c.Flags, set)
+
 	if nerr != nil {
 		fmt.Println(nerr)
 		fmt.Println("")
@@ -86,6 +80,15 @@ func (c Command) Run(ctx *Context) error {
 	context := NewContext(ctx.App, set, ctx.globalSet, ctx.SetArgs)
 	if checkCommandHelp(context, c.Name) {
 		return nil
+	}
+
+	if err != nil || argErr != nil {
+		//fmt.Print("There is an error with the command entered. ", argErr, "\n\n")
+		detail := argErr.Error()
+		ShowErrorMessage("[There is an error with the entered command]", detail)
+		ShowCommandHelp(ctx, c.Name)
+		fmt.Println("")
+		return err
 	}
 
 	c.Action(context)
@@ -121,6 +124,7 @@ func (c Command) BuildCustomArgs(ctx *Context) error {
 		err := fmt.Errorf("Not enough arguments! Expecting [%v] arguments, was given [%v].", r, i)
 		return err
 	}
+
 	ctx.SetArgs = m
 	return nil
 }

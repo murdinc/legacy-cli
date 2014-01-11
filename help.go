@@ -2,23 +2,20 @@ package cli
 
 import (
 	"fmt"
-	"os"
-	"text/tabwriter"
-	"text/template"
 )
 
 // The text template for the Default help topic.
 // cli.go uses text/template to render templates. You can
 // render custom help text by setting this variable.
-var AppHelpTemplate = `{{.Name}} - version {{.Version}}
+var AppHelpTemplate = `{{ printf "\033[%qm%v\033[0m" "33" .Name }} - {{ printf "\033[%qm%v\033[0m" "33" .Version }}
 
-Usage:
+{{ ansi "fgyellow"}}Usage:{{ ansi ""}}
    {{.Name}} [global options] command [command options] [arguments...]
 
-COMMANDS:
+{{ ansi "fgyellow"}}Commands:{{ ansi ""}}
    {{range .Commands}}{{.Name}}{{with .ShortName}}, {{.}}{{end}}{{ "\t" }}{{.Description}}
    {{end}}
-GLOBAL OPTIONS:
+{{ ansi "fgyellow"}}Global Options:{{ ansi ""}}
    {{range .Flags}}{{.}}
    {{end}}
 `
@@ -26,16 +23,16 @@ GLOBAL OPTIONS:
 // The text template for the command help topic.
 // cli.go uses text/template to render templates. You can
 // render custom help text by setting this variable.
-var CommandHelpTemplate = `Usage:
+var CommandHelpTemplate = `{{ ansi "fgyellow"}}Usage:{{ ansi ""}}
    {{.Name}} {{range .Arguments}}{{if .Optional}}[{{.Name}}] {{else}}{{.Name}} {{end}}{{end}}[--flags]
 
-Arguments:{{range .Arguments}}
+{{ ansi "fgyellow"}}Arguments:{{ ansi ""}}{{range .Arguments}}
    {{if .Optional}}[{{.Name}}]{{else}}{{.Name}}{{end}}{{ "\t" }}{{.Description}}{{end}}
 
-Flags:
+{{ ansi "fgyellow"}}Flags:{{ ansi ""}}
    {{range .Flags}}{{.}}{{end}}
 
-Example:
+{{ ansi "fgyellow"}}Example:{{ ansi ""}}
    {{.Example}}
 `
 
@@ -55,34 +52,29 @@ var helpCommand = Command{
 
 // Prints help for the App
 func ShowAppHelp(c *Context) {
-	printHelp(AppHelpTemplate, c.App)
+	printAnsi(AppHelpTemplate, c.App)
 }
+
+// Prints an error message
+func PrintError(c *Context) {
+        printAnsi(AppHelpTemplate, c.App)
+}
+
 
 // Prints help for the given command
 func ShowCommandHelp(c *Context, command string) {
 	for _, c := range c.App.Commands {
 		if c.HasName(command) {
-			printHelp(CommandHelpTemplate, c)
+			printAnsi(CommandHelpTemplate, c)
 			return
 		}
 	}
-
 	fmt.Printf("No help topic for '%v'\n", command)
 }
 
 // Prints the version number of the App
 func ShowVersion(c *Context) {
 	fmt.Printf("%v version %v\n", c.App.Name, c.App.Version)
-}
-
-func printHelp(templ string, data interface{}) {
-	w := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', 0)
-	t := template.Must(template.New("help").Parse(templ))
-	err := t.Execute(w, data)
-	if err != nil {
-		panic(err)
-	}
-	w.Flush()
 }
 
 func checkVersion(c *Context) bool {
