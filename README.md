@@ -1,4 +1,3 @@
-[![Build Status](https://travis-ci.org/ahmad972/cli.png?branch=master)](https://travis-ci.org/ahmad972/cli)
 
 # cli.go
 cli.go is simple, fast, and fun package for building command line apps in Go. The goal is to enable developers to write fast and distributable command line applications in an expressive way.
@@ -21,7 +20,7 @@ Make sure you have the a working Go environment (go 1.1 is *required*). [See the
 
 To install cli.go, simply run:
 ```
-$ go get github.com/ahmad972/cli
+$ go get github.com/murdinc/cli
 ```
 
 Make sure your PATH includes to the `$GOPATH/bin` directory so your commands can be easily used:
@@ -37,7 +36,7 @@ package main
 
 import (
   "os"
-  "github.com/ahmad972/cli"
+  "github.com/murdinc/cli"
 )
 
 func main() {
@@ -52,7 +51,7 @@ package main
 
 import (
   "os"
-  "github.com/ahmad972/cli"
+  "github.com/murdinc/cli"
 )
 
 func main() {
@@ -79,7 +78,7 @@ package main
 
 import (
   "os"
-  "github.com/ahmad972/cli"
+  "github.com/murdinc/cli"
 )
 
 func main() {
@@ -197,4 +196,4 @@ app.Commands = []cli.Command{
 ```
 
 ## About
-cli.go is written by none other than the [Code Gangsta](http://codegangsta.io) - This version of the library was modified by ahmad972 to add additional functionality
+cli.go is written by none other than the [Code Gangsta](http://codegangsta.io) - This version of the library was modified by murdinc to add additional functionality

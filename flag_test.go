@@ -1,7 +1,7 @@
 package cli_test
 
 import (
-	"github.com/ahmad972/cli"
+	"github.com/murdinc/cli"
 	"testing"
 )
 

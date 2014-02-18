@@ -85,7 +85,7 @@ func (c Command) Run(ctx *Context) error {
 	if err != nil || argErr != nil {
 		//fmt.Print("There is an error with the command entered. ", argErr, "\n\n")
 		detail := argErr.Error()
-		ShowErrorMessage("[There is an error with the entered command]", detail)
+		ShowErrorMessage("There is an error with the entered command", detail)
 		ShowCommandHelp(ctx, c.Name)
 		fmt.Println("")
 		return err

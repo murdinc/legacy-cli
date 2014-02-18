@@ -2,7 +2,7 @@ package cli_test
 
 import (
 	"flag"
-	"github.com/ahmad972/cli"
+	"github.com/murdinc/cli"
 	"testing"
 )
 

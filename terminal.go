@@ -70,6 +70,9 @@ var ErrorMessageTemplate = `
 `
 
 func ShowErrorMessage(title string, message string) {
+
+	title = fmt.Sprintf("[%s]", title)
+
 	// Figure out how wide of a notification we are going to be building
 	titleWidth := len(title)
 	msgWidth := len(message)
