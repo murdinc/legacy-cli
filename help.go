@@ -37,9 +37,9 @@ var CommandHelpTemplate = `{{ ansi "fgyellow"}}Usage:{{ ansi ""}}
 `
 
 var helpCommand = Command{
-	Name:      "help",
-	ShortName: "h",
-	Description:     "Shows a list of commands or help for one command",
+	Name:        "help",
+	ShortName:   "h",
+	Description: "Shows a list of commands or help for one command",
 	Action: func(c *Context) {
 		args := c.Args()
 		if args.Present() {
@@ -52,20 +52,19 @@ var helpCommand = Command{
 
 // Prints help for the App
 func ShowAppHelp(c *Context) {
-	printAnsi(AppHelpTemplate, c.App)
+	PrintAnsi(AppHelpTemplate, c.App)
 }
 
 // Prints an error message
 func PrintError(c *Context) {
-        printAnsi(AppHelpTemplate, c.App)
+	PrintAnsi(AppHelpTemplate, c.App)
 }
-
 
 // Prints help for the given command
 func ShowCommandHelp(c *Context, command string) {
 	for _, c := range c.App.Commands {
 		if c.HasName(command) {
-			printAnsi(CommandHelpTemplate, c)
+			PrintAnsi(CommandHelpTemplate, c)
 			return
 		}
 	}

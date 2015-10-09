@@ -9,12 +9,12 @@ import (
 )
 
 type errorMessage struct {
-	Title           string
-	Message         string
-	Blank           string
+	Title   string
+	Message string
+	Blank   string
 }
 
-func printAnsi(templ string, data interface{}) {
+func PrintAnsi(templ string, data interface{}) {
 	ansiTemplate := template.FuncMap{
 		"ansi": AnsiCode,
 	}
@@ -28,33 +28,56 @@ func printAnsi(templ string, data interface{}) {
 	w.Flush()
 }
 
-// AnsiCode outputs the ansi codes for changing terminal colors and behaviors. 
-func AnsiCode (code string) string {
+// AnsiCode outputs the ansi codes for changing terminal colors and behaviors.
+func AnsiCode(code string) string {
 	var ansiCode int
 	switch code {
-		case "reset":		ansiCode = 0
-		case "bright":		ansiCode = 1
-		case "dim":		ansiCode = 2
-		case "underscore":	ansiCode = 4
-		case "blink":		ansiCode = 5
-		case "reverse":		ansiCode = 7
-		case "hidden":		ansiCode = 8
-		case "fgblack":		ansiCode = 30
-		case "fgred":		ansiCode = 31
-		case "fggreen":		ansiCode = 32
-		case "fgyellow":	ansiCode = 33
-		case "fgblue":		ansiCode = 34
-		case "fgmagenta":	ansiCode = 35
-		case "fgcyan":		ansiCode = 36
-		case "fgwhite":		ansiCode = 37
-		case "bgblack":		ansiCode = 40
-		case "bgred":		ansiCode = 41
-		case "bggreen":		ansiCode = 42
-		case "bgyellow":	ansiCode = 43
-		case "bgblue":		ansiCode = 44
-		case "bgmagenta":	ansiCode = 45
-		case "bgcyan":		ansiCode = 46
-		case "bgwhite":		ansiCode = 47
+	case "reset":
+		ansiCode = 0
+	case "bright":
+		ansiCode = 1
+	case "dim":
+		ansiCode = 2
+	case "underscore":
+		ansiCode = 4
+	case "blink":
+		ansiCode = 5
+	case "reverse":
+		ansiCode = 7
+	case "hidden":
+		ansiCode = 8
+	case "fgblack":
+		ansiCode = 30
+	case "fgred":
+		ansiCode = 31
+	case "fggreen":
+		ansiCode = 32
+	case "fgyellow":
+		ansiCode = 33
+	case "fgblue":
+		ansiCode = 34
+	case "fgmagenta":
+		ansiCode = 35
+	case "fgcyan":
+		ansiCode = 36
+	case "fgwhite":
+		ansiCode = 37
+	case "bgblack":
+		ansiCode = 40
+	case "bgred":
+		ansiCode = 41
+	case "bggreen":
+		ansiCode = 42
+	case "bgyellow":
+		ansiCode = 43
+	case "bgblue":
+		ansiCode = 44
+	case "bgmagenta":
+		ansiCode = 45
+	case "bgcyan":
+		ansiCode = 46
+	case "bgwhite":
+		ansiCode = 47
 	}
 	output := fmt.Sprintf("\033[%dm", ansiCode)
 	return output
@@ -93,17 +116,16 @@ func ShowErrorMessage(title string, message string) {
 	message = addPadding(message, totalWidth)
 
 	// Finally print the output
-	printAnsi(ErrorMessageTemplate, errorMessage{Title: title, Message: message, Blank: blank})
+	PrintAnsi(ErrorMessageTemplate, errorMessage{Title: title, Message: message, Blank: blank})
 }
 
 func addPadding(s string, w int) string {
-	if len(s) % 2 != 0 {
+	if len(s)%2 != 0 {
 		s += " "
 	}
 
-	padding := strings.Repeat(" ", (w - len(s) % w) / 2)
-	t := []string{padding, s, padding};
+	padding := strings.Repeat(" ", (w-len(s)%w)/2)
+	t := []string{padding, s, padding}
 	padded := strings.Join(t, "")
 	return padded
 }
-
