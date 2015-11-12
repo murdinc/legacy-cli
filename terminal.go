@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"strings"
@@ -8,7 +9,7 @@ import (
 	"text/template"
 )
 
-type errorMessage struct {
+type boxMessage struct {
 	Title   string
 	Message string
 	Blank   string
@@ -89,10 +90,80 @@ var ErrorMessageTemplate = `
 {{ ansi "fgwhite"}}{{ ansi "bgred"}}{{.Blank}}{{ ansi ""}}
 {{ ansi "fgwhite"}}{{ ansi "bgred"}}{{.Message}}{{ ansi ""}}
 {{ ansi "fgwhite"}}{{ ansi "bgred"}}{{.Blank}}{{ ansi ""}}
-
 `
 
+/*
+var BoxPromptTemplate = `
+{{ ansi "reverse"}}{{.Blank}}{{ ansi ""}}
+{{ ansi "reverse"}}{{.Title}}{{ ansi ""}}
+{{ ansi "reverse"}}{{.Blank}}{{ ansi ""}}
+{{ ansi "reverse"}}{{.Message}}{{ ansi ""}}
+{{ ansi "reverse"}}{{.Blank}}{{ ansi ""}}
+`
+
+var InformationTemplate = `
+{{ ansi "reverse"}}{{.}}{{ ansi ""}}
+`
+*/
+
+var BoxPromptTemplate = `
+{{ ansi "fgblack"}}{{ ansi "bgcyan"}}{{.Blank}}{{ ansi ""}}
+{{ ansi "fgblack"}}{{ ansi "bgcyan"}}{{.Title}}{{ ansi ""}}
+{{ ansi "fgblack"}}{{ ansi "bgcyan"}}{{.Blank}}{{ ansi ""}}
+{{ ansi "fgblack"}}{{ ansi "bgcyan"}}{{.Message}}{{ ansi ""}}
+{{ ansi "fgblack"}}{{ ansi "bgcyan"}}{{.Blank}}{{ ansi ""}}
+`
+
+var InformationTemplate = `
+{{ ansi "fgblack"}}{{ ansi "bgcyan"}}{{.}}{{ ansi ""}}
+`
+
+// Error Message
 func ShowErrorMessage(title string, message string) {
+	boxMessage := prepMessage(title, message)
+	PrintAnsi(ErrorMessageTemplate, boxMessage)
+}
+
+// Input Prompt Bool
+func BoxPromptBool(title string, message string) bool {
+
+	boxMessage := prepMessage(title, message)
+	PrintAnsi(BoxPromptTemplate, boxMessage)
+
+	return askForConfirmation()
+}
+
+// Input Prompt String
+func BoxPromptString(title string, message string) string {
+
+	boxMessage := prepMessage(title, message)
+	PrintAnsi(BoxPromptTemplate, boxMessage)
+
+	return askForString()
+}
+
+func PromptString(message string) string {
+	Information(message)
+	return askForString()
+}
+
+func PromptInt(message string, max int) int {
+	Information(message)
+	return askForInt(max)
+}
+
+func PromptBool(message string) bool {
+	Information(message)
+	return askForConfirmation()
+}
+
+func Information(message string) {
+	message = padStringRight(message, 100)
+	PrintAnsi(InformationTemplate, message)
+}
+
+// formats and prints a title and message in a template block
+func prepMessage(title string, message string) boxMessage {
 
 	title = fmt.Sprintf("[%s]", title)
 
@@ -109,17 +180,22 @@ func ShowErrorMessage(title string, message string) {
 
 	totalWidth += (totalWidth % 2)
 
+	// Pad our strings until they are centered at the same width
+	title = padStringCenter(title, totalWidth)
+	message = padStringCenter(message, totalWidth)
 	blank := strings.Repeat(" ", totalWidth)
 
-	// Pad our strings until they are centered at the same width
-	title = addPadding(title, totalWidth)
-	message = addPadding(message, totalWidth)
+	/*
+		title = padStringCenter(title, 100)
+		message = padStringCenter(message, 100)
+		blank := strings.Repeat(" ", 100)
+	*/
 
-	// Finally print the output
-	PrintAnsi(ErrorMessageTemplate, errorMessage{Title: title, Message: message, Blank: blank})
+	return boxMessage{Title: title, Message: message, Blank: blank}
 }
 
-func addPadding(s string, w int) string {
+// Padding helpers
+func padStringCenter(s string, w int) string {
 	if len(s)%2 != 0 {
 		s += " "
 	}
@@ -128,4 +204,117 @@ func addPadding(s string, w int) string {
 	t := []string{padding, s, padding}
 	padded := strings.Join(t, "")
 	return padded
+}
+
+func padStringRight(s string, w int) string {
+
+	padding := strings.Repeat(" ", (w - len(s)))
+	t := []string{"  ", s, padding}
+	padded := strings.Join(t, "")
+	return padded
+}
+
+/*
+func askForString() string {
+
+	fmt.Print("> ")
+	var response string
+	fmt.Scanln(&response)
+
+	if len(response) > 0 {
+		return response
+	} else {
+		Information("Please enter a value and then press enter:")
+		return askForString()
+	}
+}
+*/
+
+func askForString() string {
+
+	var resp string
+
+	fmt.Print("> ")
+
+	scanner := bufio.NewScanner(os.Stdin)
+
+	for scanner.Scan() {
+		resp = scanner.Text()
+
+		// Check for errors during `Scan`. End of file is
+		// expected and not reported by `Scan` as an error.
+		if err := scanner.Err(); err != nil || len(resp) == 0 {
+			Information("Please enter a value and then press enter:")
+			return askForString()
+		} else {
+			break
+		}
+	}
+
+	return resp
+
+}
+
+func askForInt(max int) int {
+
+	fmt.Print("> ")
+
+	var i int
+
+	_, err := fmt.Scan(&i)
+
+	if err == nil && i > 0 && i <= max {
+		return i
+	}
+
+	if i == 0 {
+		var discard string
+		fmt.Scanln(&discard) // eww
+	}
+
+	Information(fmt.Sprintf("Please enter a number between 1 and %d, then press enter:", max))
+	return askForInt(max)
+}
+
+// Borrowed with care from: https://gist.github.com/albrow/5882501
+//
+// askForConfirmation uses Scanln to parse user input. A user must type in "yes" or "no" and
+// then press enter. It has fuzzy matching, so "y", "Y", "yes", "YES", and "Yes" all count as
+// confirmations. If the input is not recognized, it will ask again. The function does not return
+// until it gets a valid response from the user. Typically, you should use fmt to print out a question
+// before calling askForConfirmation. E.g. fmt.Println("WARNING: Are you sure? (yes/no)")
+func askForConfirmation() bool {
+
+	fmt.Print("> ")
+	var response string
+	fmt.Scanln(&response)
+
+	okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
+	nokayResponses := []string{"n", "N", "no", "No", "NO"}
+	if containsString(okayResponses, response) {
+		return true
+	} else if containsString(nokayResponses, response) {
+		return false
+	} else {
+		Information("Please type 'yes' or 'no' and then press enter:")
+		return askForConfirmation()
+	}
+}
+
+// You might want to put the following two functions in a separate utility package.
+
+// posString returns the first index of element in slice.
+// If slice does not contain element, returns -1.
+func posString(slice []string, element string) int {
+	for index, elem := range slice {
+		if elem == element {
+			return index
+		}
+	}
+	return -1
+}
+
+// containsString returns true iff slice contains element
+func containsString(slice []string, element string) bool {
+	return !(posString(slice, element) == -1)
 }

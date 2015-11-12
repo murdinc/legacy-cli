@@ -143,4 +143,3 @@ func (a *App) appendFlag(flag Flag) {
 		a.Flags = append(a.Flags, flag)
 	}
 }
-
