@@ -7,6 +7,8 @@ import (
 	"strings"
 	"text/tabwriter"
 	"text/template"
+
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 type boxMessage struct {
@@ -117,6 +119,9 @@ var BoxPromptTemplate = `
 var InformationTemplate = `
 {{ ansi "fgblack"}}{{ ansi "bgcyan"}}{{.}}{{ ansi ""}}
 `
+var ErrorLineTemplate = `
+{{ ansi "fgwhite"}}{{ ansi "bgred"}}{{.}}{{ ansi ""}}
+`
 
 // Error Message
 func ShowErrorMessage(title string, message string) {
@@ -147,6 +152,11 @@ func PromptString(message string) string {
 	return askForString()
 }
 
+func PromptPassword(message string) string {
+	Information(message)
+	return askForPassword()
+}
+
 func PromptInt(message string, max int) int {
 	Information(message)
 	return askForInt(max)
@@ -160,6 +170,11 @@ func PromptBool(message string) bool {
 func Information(message string) {
 	message = padStringRight(message, 100)
 	PrintAnsi(InformationTemplate, message)
+}
+
+func ErrorLine(message string) {
+	message = padStringRight(message, 100)
+	PrintAnsi(ErrorLineTemplate, message)
 }
 
 // formats and prints a title and message in a template block
@@ -208,27 +223,16 @@ func padStringCenter(s string, w int) string {
 
 func padStringRight(s string, w int) string {
 
+	if w < len(s) {
+		w = len(s) + 1
+	}
+
 	padding := strings.Repeat(" ", (w - len(s)))
 	t := []string{"  ", s, padding}
 	padded := strings.Join(t, "")
+
 	return padded
 }
-
-/*
-func askForString() string {
-
-	fmt.Print("> ")
-	var response string
-	fmt.Scanln(&response)
-
-	if len(response) > 0 {
-		return response
-	} else {
-		Information("Please enter a value and then press enter:")
-		return askForString()
-	}
-}
-*/
 
 func askForString() string {
 
@@ -252,7 +256,27 @@ func askForString() string {
 	}
 
 	return resp
+}
 
+func askForPassword() string {
+
+	state, err := terminal.MakeRaw(0)
+	if err != nil {
+		return ""
+	}
+
+	defer terminal.Restore(0, state)
+
+	term := terminal.NewTerminal(os.Stdout, "")
+
+	bytePassword, err := term.ReadPassword("> ")
+	if err != nil {
+		return ""
+	}
+
+	fmt.Println(strings.Repeat("*", len(bytePassword)))
+
+	return strings.TrimSpace(string(bytePassword))
 }
 
 func askForInt(max int) int {
