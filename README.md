@@ -7,7 +7,7 @@ I have also included the [termtable library written by stevedomin] (https://gith
 
 This library is *NOT* backwards compatible with the version written by codegangsta, as I have changed some terminologies and types to accomodate named arguments. This was done to allow for mandatory and optional arguments to commands. It should not be too time consuming to adapt an existing project to use this library though, all of the changes can be made in the place where NewApp() is defined. 
 
-I also added ansi color  support via text/template and a function to display errors. 
+I also added ansi color support via text/template and functions to display errors, information, and prompt for strings, bools, and passwords. 
 
 
 ## Overview
